@@ -6,12 +6,15 @@
 </template>
 
 <script>
+import axios from 'axios'
 let myChart
 export default {
 	name: 'EchartDemo', 
 	data(){
 		return {
 			num: 3, 
+			overall: [], 
+			progress: [], 
 			emphasisStyle: {
 				itemStyle: {
 					shadowBlur: 10,
@@ -61,22 +64,6 @@ export default {
 							stack: 'one',
 							emphasis: this.emphasisStyle,
 							data: []
-						},
-						{
-							name: 'bar3',
-							type: 'bar',
-							color: 'yellow', 
-							stack: 'one',
-							emphasis: this.emphasisStyle,
-							data: []
-						},
-						{
-							name: 'bar4',
-							type: 'bar',
-							color: 'black',
-							stack: 'one',
-							emphasis: this.emphasisStyle,
-							data: []
 						}
 					]
 			}
@@ -85,23 +72,38 @@ export default {
 	mounted(){
 		this.showChart()
 	}, 
+	created(){
+		this.generateData()
+	}, 
 	methods: {
-		generateData(){
-			for (var i = 0; i < this.num; i++) {
-				this.option.xAxis.data.push('Class' + i);
-				this.option.series[0].data.push((Math.random() * 2).toFixed(2));
-				this.option.series[1].data.push((Math.random() * 5).toFixed(2));
-				this.option.series[2].data.push((Math.random() + 0.3).toFixed(2));
-				this.option.series[3].data.push(-Math.random().toFixed(2));
-			}
+		// generateData(){
+		// 	for (var i = 0; i < this.num; i++) {
+		// 		// this.option.xAxis.data.push('Class' + i);
+		// 		this.option.series[0].data.push((Math.random() * 2).toFixed(2));
+		// 		this.option.series[1].data.push((Math.random() * 5).toFixed(2));
+		// 	}
+		// }, 
+		async generateData(){
+			// axios.get("/api/get/news").then(res => (this.tableData = res.data.list));
+			const result = await axios.get("/api/get/charts")
+
+			this.overall.push(result.data.list.cartOneOverall)
+			this.overall.push(result.data.list.cartTwoOverall)
+			this.progress.push(result.data.list.cartOneProgress)
+			this.progress.push(result.data.list.cartTwoProgress)
+
+			this.option.series[0].data = this.overall
+			this.option.series[1].data = this.progress
+
+			myChart.setOption(this.option);
 		}, 
 
 		updateData(){
-			this.option.xAxis.data = []
-			this.option.series[0].data = []
-			this.option.series[1].data = []
-			this.option.series[2].data = []
-			this.option.series[3].data = []
+			//this.option.xAxis.data = []
+			// this.option.series[0].data = []
+			// this.option.series[1].data = []
+			this.overall = []
+			this.progress = []
 			this.generateData()
 			myChart.setOption(this.option);
 		}, 
@@ -110,7 +112,9 @@ export default {
 			const chartDom = document.getElementById('myChart')
 			myChart = this.$echarts.init(chartDom)
 
-			this.generateData()
+			for(var i  = 0; i < this.num; i++){
+				this.option.xAxis.data.push('Class' + i);
+			}
 
 			// 使用刚指定的配置项和数据显示图表
 			myChart.setOption(this.option);

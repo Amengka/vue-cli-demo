@@ -2,6 +2,7 @@
 	<div class = 'home'>
 		<input type="text" placeholder="Please input message" v-model = "msg">
 		<button @click = 'handleSendBtnClick'>Send</button>
+		<button @click = 'disconnect'>Disconnect</button>
 		<ul>
 			<li 
 			v-for = "msg in msgList"
@@ -27,7 +28,7 @@ export default {
 		return{
 			msg: '', 
 			username: '', 
-			msgList: []
+			msgList: [], 
 		}
 	}, 
 	mounted(){
@@ -38,10 +39,14 @@ export default {
 			return
 		}
 
-		ws.addEventListener('open', this.handleWsOpen.bind(this), false)
-		ws.addEventListener('close', this.handleWsClose.bind(this), false)
-		ws.addEventListener('error', this.handleWsError.bind(this), false)
-		ws.addEventListener('message', this.handleWsMessage.bind(this), false)
+		ws.onopen = this.handleWsOpen.bind(this)
+		ws.onclose = this.handleWsClose.bind(this)
+		ws.onerror = this.handleWsError.bind(this)
+		ws.onmessage = this.handleWsMessage.bind(this)
+		// ws.addEventListener('open', this.handleWsOpen.bind(this), false)
+		// ws.addEventListener('close', this.handleWsClose.bind(this), false)
+		// ws.addEventListener('error', this.handleWsError.bind(this), false)
+		// ws.addEventListener('message', this.handleWsMessage.bind(this), false)
 	}, 
 	methods: {
 		handleSendBtnClick(){
@@ -73,6 +78,12 @@ export default {
 			const msg = JSON.parse(e.data)
 			this.msgList.push(msg)
 		}, 
+
+		disconnect(){
+			if(ws.readyState === WebSocket.OPEN){
+				ws.close()
+			}
+		}
 	}
 }
 </script>
