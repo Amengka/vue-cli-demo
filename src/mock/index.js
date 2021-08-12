@@ -35,12 +35,13 @@ Mock.mock('/api/post/news', 'post',()=> {
 	}
 })
 
+const data = [1, 2]
 Mock.mock('/api/get/tables', 'get', ()=>{
 	return{
 		status: 200, 
 		message: 'successful in getting table data', 
 		list: Mock.mock({
-			"list|4-6":[
+			"list|10-12":[
 				{
 					"id": "@increment", 
 					"name": "@name(3-5)", 
@@ -48,20 +49,23 @@ Mock.mock('/api/get/tables', 'get', ()=>{
 					"desc": "@csentence(10)", 
 					"address": "@city(true)", 
 					"shop": "@cword(5)", 
-					"shopID": Mock.Random.integer(1, 100)
+					// "shopId": Mock.Random.integer(1, 2)
+					"shopId|1": data
 				}
 			]
 		})
 	}
 })
 
+
+Mock.mock('/api/get/imgs', 'get', () => {
+	return {
+      status: 200,
+      message: 'successful in getting img',
+    //   img_url: "@image('250x250', '#FF83FA', '#FCFCFC', 'png', 'Armui')", 
+	img_url: Mock.Random.image('250x250','#FF83FA', '#FCFCFC', 'png', 'Armui')
+	}
+  })
+
 //首页相关
 //Mock.mock(/\/home\/getData/, "get", homeApi.getStatisticalData);
-
-// id: '12987122',
-// name: '好滋好味鸡蛋仔',
-// category: '江浙小吃、小吃零食',
-// desc: '荷兰优质淡奶，奶香浓而不腻',
-// address: '上海市普陀区真北路',
-// shop: '王小虎夫妻店',
-// shopId: '10333'
