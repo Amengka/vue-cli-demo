@@ -105,7 +105,6 @@ export default {
 			this.overall = []
 			this.progress = []
 			this.generateData()
-			myChart.setOption(this.option);
 		}, 
 
 		showChart(){
@@ -118,9 +117,13 @@ export default {
 
 			// 使用刚指定的配置项和数据显示图表
 			myChart.setOption(this.option);
-			window.onresize = function(){
-				myChart.resize();
-			}
+			setTimeout(function() {
+				window.onresize = function() {
+					myChart.resize()
+				}
+			}, 200)
+			let size = document.getElementById('myChart').getBoundingClientRect()
+			console.log(size)
 		}
 	}
 }

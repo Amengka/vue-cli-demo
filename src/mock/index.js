@@ -14,7 +14,7 @@ import Mock from 'mockjs'
 // 		"cartTwoProgress": Mock.Random.float(3, 5, 1, 1),  
 // })
 
-
+// chart
 Mock.mock('/api/get/charts', 'get', ()=>{
 	return{
 		status: 200, 
@@ -35,7 +35,7 @@ Mock.mock('/api/post/news', 'post',()=> {
 	}
 })
 
-const data = [1, 2]
+// table
 Mock.mock('/api/get/tables', 'get', ()=>{
 	return{
 		status: 200, 
@@ -45,12 +45,11 @@ Mock.mock('/api/get/tables', 'get', ()=>{
 				{
 					"id": "@increment", 
 					"name": "@name(3-5)", 
-					"category": Mock.Random.integer(1, 6),  
+					"category|1-6": 1,  
 					"desc": "@csentence(10)", 
 					"address": "@city(true)", 
 					"shop": "@cword(5)", 
-					// "shopId": Mock.Random.integer(1, 2)
-					"shopId|1": data
+					"shopId|1-2": 1
 				}
 			]
 		})
@@ -64,6 +63,40 @@ Mock.mock('/api/get/imgs', 'get', () => {
       message: 'successful in getting img',
     //   img_url: "@image('250x250', '#FF83FA', '#FCFCFC', 'png', 'Armui')", 
 	img_url: Mock.Random.image('250x250','#FF83FA', '#FCFCFC', 'png', 'Armui')
+	}
+  })
+
+// arm
+  Mock.mock('/apiv2/depalletize', 'get', () => {
+	return {
+		status: 200, 
+		message: 'successful in getting arm data', 
+		list: Mock.mock({
+			'data|8-12':[
+				{
+					'CommonRequest': {
+						'WareHouseID': "@sentence(1)",
+						'RequestID': "@sentence(1)",
+						'RequestTime': Mock.Random.datetime(), 
+						'ClientCode': "@sentence(1)", 
+						'TokenCode': "@sentence(1)",
+					}, 
+					'ExtParams': {
+						'Unload': Mock.Random.integer(1,20), 
+						'TurnMode': Mock.Random.integer(1, 5), 
+						'RobotFace': Mock.Random.float(1, 10), 
+						'PluInfo': "@sentence(1)", 
+						'PickIntent': Mock.Random.integer(1, 10)
+					}, 
+					'PalletID': "@sentence(1)", 
+					'autoCarry': Mock.Random.integer(1, 3),
+					'PodNum': Mock.Random.integer(1, 10), 
+					'BizID': "@sentence(1)", 
+					'BizType': "@sentence(1)", 
+					'BoxList': "@sentence(1)"
+				}
+			]
+		})
 	}
   })
 

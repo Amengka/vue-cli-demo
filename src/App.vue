@@ -1,14 +1,24 @@
 <template>
   <div id="app">
-	<router-view/>
-	<EchartDemo/>
-	<elementUITableDemo/>
+	<div>
+		<router-view/>
+	</div>
+	<div>
+		<Steps/>
+	</div>
+	<div>
+		<EchartDemo/>
+	</div>
+	<div>
+		<elementUITableDemo/>
+	</div>
   </div>
 </template>
 
 <script>
 import EchartDemo from './components/EchartDemo.vue'
 import elementUITableDemo from './components/elementUITableDemo.vue'
+import Steps from './components/steps.vue'
 
 // import axios from 'axios'
 
@@ -16,7 +26,8 @@ export default {
   name: 'App',
   components: {
 	EchartDemo, 
-	elementUITableDemo
+	elementUITableDemo,
+    Steps
   }, 
 
   created(){
