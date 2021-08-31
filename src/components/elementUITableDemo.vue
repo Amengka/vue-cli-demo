@@ -111,7 +111,8 @@
 </style>
 
 <script>
-import axios from 'axios'
+// import axios from 'axios'
+import {EventBus} from '../utils/eventBus'
   export default {
     data() {
       return {
@@ -121,11 +122,16 @@ import axios from 'axios'
       }
     }, 
 	methods:{
-		async getData(){
-			const result = await axios.get("/api/get/tables")
-			const armuiData = await axios.get("/apiv2/depalletize")
-			this.tableData = result.data.list.list
-			console.log(armuiData.data)
+		getData(){
+			// const result = await axios.get("/api/get/tables")
+			// this.tableData = result.data.list.list
+			// this.$eventBus.$on('tableData', (data) => {
+			// 	this.tableData = data
+			// })
+			EventBus.$on('tableData', (data) => {
+				this.tableData = data
+			})
+			// console.log(this.tableData)`
 		}, 
 		isCompleted(element){
 			return element.shopId === 1
@@ -135,7 +141,8 @@ import axios from 'axios'
 		}
 	}, 
 	created(){
-		this.getData()
+		setInterval(this.getData, 3000)
+		// this.getData()
 	}
   }
 </script>

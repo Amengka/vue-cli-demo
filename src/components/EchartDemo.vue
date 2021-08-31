@@ -15,6 +15,7 @@ export default {
 			num: 3, 
 			overall: [], 
 			progress: [], 
+			height: 0,
 			emphasisStyle: {
 				itemStyle: {
 					shadowBlur: 10,
@@ -71,9 +72,11 @@ export default {
 	}, 
 	mounted(){
 		this.showChart()
+		this.getParent()
 	}, 
 	created(){
 		this.generateData()
+		// this.getParent()
 	}, 
 	methods: {
 		// generateData(){
@@ -122,8 +125,19 @@ export default {
 					myChart.resize()
 				}
 			}, 200)
-			let size = document.getElementById('myChart').getBoundingClientRect()
-			console.log(size)
+			// let size = document.getElementById('myChart').getBoundingClientRect()
+			// console.log(size)console
+		}, 
+
+		getParent(){
+			// let parent = document.getElementsByClassName('echart')
+			const parent = document.getElementById('app')
+			const chart = document.getElementById('myChart')
+			// console.log(parent.clientHeight)
+			// console.log(parent[0].clientHeight)
+			// this.height = parent[0].clientHeight
+			this.height = parent.clientHeight
+			chart.height = parent.clientHeight * 0.5
 		}
 	}
 }
@@ -131,8 +145,8 @@ export default {
 
 <style scoped>
 #myChart{
-	width: 800px;
-	height: 500px;
+	width: 50rem;
+	height: 31.25rem;
 	margin: 0; 
 	padding: 0;
 }

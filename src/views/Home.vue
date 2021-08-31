@@ -1,6 +1,7 @@
 <template>
 	<div class = 'home'>
-		<input type="text" placeholder="Please input message" v-model = "msg">
+		{{data}}
+		<!-- <input type="text" placeholder="Please input message" v-model = "msg">
 		<button @click = 'handleSendBtnClick'>Send</button>
 		<button @click = 'disconnect'>Disconnect</button>
 		<ul>
@@ -14,76 +15,81 @@
 			</p>
 			<p>Message: {{msg.msg}}</p>
 			</li>
-		</ul>
+		</ul> -->
 	</div>
 </template>
 
 <script>
+import axios from 'axios'
 
-const ws = new WebSocket('ws://localhost:8000')
+// const ws = new WebSocket('ws://127.0.0.1:5004/homepage_ws')
+// import {EventBus} from '../utils/eventBus'
+// import {initWebSocket} from '../utils/websocket'
+// import '../utils/websocket'
 
 export default {
 	name: 'Home', 
 	data(){
 		return{
-			msg: '', 
-			username: '', 
-			msgList: [], 
+			ws: null,
+			data: null
 		}
 	}, 
-	mounted(){
-		this.username = localStorage.getItem('username');
-
-		if(!this.username){
-			this.$router.push('/login')
-			return
-		}
-
-		ws.onopen = this.handleWsOpen.bind(this)
-		ws.onclose = this.handleWsClose.bind(this)
-		ws.onerror = this.handleWsError.bind(this)
-		ws.onmessage = this.handleWsMessage.bind(this)
-		// ws.addEventListener('open', this.handleWsOpen.bind(this), false)
-		// ws.addEventListener('close', this.handleWsClose.bind(this), false)
-		// ws.addEventListener('error', this.handleWsError.bind(this), false)
-		// ws.addEventListener('message', this.handleWsMessage.bind(this), false)
-	}, 
+	mounted(){},
+	created(){
+		this.websocket.initWebSocket()
+		axios.get('https://yapi.mcd.megvii-inc.com/mock/2962/getArmStatus')
+		.then(response => (this.data = response.data))
+		.catch(error => console.log(error))
+		// initWebSocket()
+	},
+	destroyed(){
+		// if(this.ws){
+		// 	this.ws.close()
+		// }
+		this.websocket.closeWebsocket()
+	},
 	methods: {
-		handleSendBtnClick(){
-			const msg = this.msg
-			if(!msg.trim().length){
-				return
-			}
-			//发送信息
-			const dataString = JSON.stringify({
-				id: new Date().getTime(), 
-				user: this.username, 
-				dateTime: new Date().getTime(), 
-				msg: this.msg
-			})
-			ws.send(dataString)
-
-			this.msg = ''
-		}, 
-		handleWsOpen(e){
-			console.log('FE: WEBSOCKET OPEN', e)
-		}, 
-		handleWsClose(e){
-			console.log('FE: WEBSOCKET CLOSE', e)
-		}, 
-		handleWsError(e){
-			console.log('FE: WEBSOCKET ERROR', e)
-		}, 
-		handleWsMessage(e){
-			const msg = JSON.parse(e.data)
-			this.msgList.push(msg)
-		}, 
-
-		disconnect(){
-			if(ws.readyState === WebSocket.OPEN){
-				ws.close()
-			}
-		}
+		// initWebSocket(){
+		// 	if(typeof(WebSocket) === "undefined"){
+		// 		alert("Your broswer does not support websocket")
+		// 	}
+		// 	this.ws = new WebSocket('ws://127.0.0.1:5004/homepage_ws')
+		// 	this.ws.onopen = this.websocketonopen;
+		// 	this.ws.onmessage = this.websocketonmessage;
+		// 	this.ws.onerror = this.websocketonerror;
+		// 	this.ws.onclose = this.websocketclose;
+		// },
+		// websocketonopen() {
+		// 	console.log("WebSocket连接成功");
+		// 	// 添加心跳检测，每30秒发一次数据，防止连接断开（这跟服务器的设置有关，如果服务器没有设置每隔多长时间不发消息断开，可以不进行心跳设置）
+		// 	// let self = this;
+		// 	// this.timer = setInterval(() => {
+		// 	// 	try {
+		// 	// 		self.websock.send('test')
+		// 	// 		console.log('发送消息');
+		// 	// 	}catch(err){
+		// 	// 		console.log('断开了：' + err);
+		// 	// 		self.connection()
+		// 	// 	}
+		// 	// }, 30000)
+		// },
+		// //接收后端返回的数据，可以根据需要进行处理
+		// websocketonmessage(e) {
+		// 	let dataJson = JSON.parse(e.data);
+		// 	console.log(dataJson);
+		// 	EventBus.$emit('tableData', dataJson)
+		// 	// this.$eventBus.$emit('tableData', dataJson)
+		// },
+		// //连接建立失败重连
+		// websocketonerror(e) {
+		// 	console.log(`连接失败的信息：`, e);
+		// 	this.initWebSocket(); // 连接失败后尝试重新连接
+		// },
+		// //关闭连接
+		// websocketclose(e) {
+		// 	console.log("断开连接", e);
+		// }
 	}
 }
 </script>

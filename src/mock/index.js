@@ -57,7 +57,7 @@ Mock.mock('/api/get/tables', 'get', ()=>{
 })
 
 
-Mock.mock('/api/get/imgs', 'get', () => {
+Mock.mock('/apiv2/depalletize/get/imgs', 'get', () => {
 	return {
       status: 200,
       message: 'successful in getting img',
