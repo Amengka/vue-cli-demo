@@ -21,7 +21,8 @@
 				<!-- <canvas id = 'mycanvas' width="919" height="525"></canvas> -->
 				<img :src="img_url" alt="" @click="handleImageClick" id = "image">
 				<el-dialog title="收货地址" :visible.sync="dialogTableVisible" width="90%">
-					<canvas id = 'mycanvas' @mousedown="setPoint" width="1200" height="800"></canvas>
+					<canvas id = 'mycanvas' @mousedown="setPoint" @mousewheel="magnifier" width = "1200" height = "800"></canvas>
+					<!-- <canvas id = 'off-canvas' @mousemove="magnifier" width = '1200' height = '800' style="display: none"></canvas> -->
 				</el-dialog>
 			</div>
 		</el-col>
@@ -58,8 +59,24 @@ export default {
 		imgNaturalHeight: 0,
 		img: null,
 		canvas: null,
+		offCanvas: null,
 		ctx: null,
-		img_url: require('./vision.png')
+		offCtx: null,
+		img_url: require('./vision.png'),
+		centerPoint: {
+			x: 0,
+			y: 0
+		},
+		originalRectangle: {
+			x: 0, 
+			y: 0,
+			width: 0,
+			height: 0
+		},
+		originalRadius: 100,
+		scale: 2,
+		scaleGlassRectangle: {},
+		canvasImgSize:{}
 	}
   },
   methods:{
@@ -67,22 +84,30 @@ export default {
 		this.img = document.querySelector('img')
 		this.imgNaturalWidth = this.img.naturalWidth
 		this.imgNaturalHeight = this.img.naturalHeight
-		console.log(this.imgNaturalWidth)
-		console.log(this.imgNaturalHeight)
+		// console.log(this.imgNaturalWidth)
+		// console.log(this.imgNaturalHeight)
 		setTimeout(() =>{
 			var dialog = document.getElementsByClassName('el-dialog')
 			var dialogHeader = document.getElementsByClassName('el-dialog__header')
 			var canvasWidth = dialog[0].clientWidth - 40 // 40px of padding
 			var canvasHeight = dialog[0].clientHeight - dialogHeader[0].offsetHeight - 60 // 60px of padding
-			var canvasImgSize = this.getImgSize(this.imgNaturalWidth, this.imgNaturalHeight, canvasWidth, canvasHeight)
-			console.log(canvasWidth)
-			console.log(canvasHeight)
-			console.log(canvasImgSize)
+			this.canvasImgSize = this.getImgSize(this.imgNaturalWidth, this.imgNaturalHeight, canvasWidth, canvasHeight)
+			// console.log(canvasWidth)
+			// console.log(canvasHeight)
+			// console.log(canvasImgSize)
 			this.canvas = document.getElementById('mycanvas')
 			this.canvas.setAttribute("width", canvasWidth)
             this.canvas.setAttribute("height",canvasHeight)
+
+			// this.offCanvas = document.getElementById('off-canvas')
+			// this.offCanvas.setAttribute("width", canvasWidth)
+            // this.offCanvas.setAttribute("height",canvasHeight)
+
 			this.ctx = this.canvas.getContext('2d')
-			this.ctx.drawImage(this.img, 0, 0, canvasImgSize.width, canvasImgSize.height)
+			this.ctx.drawImage(this.img, 0, 0, this.canvasImgSize.width, this.canvasImgSize.height)
+
+			// this.offCtx = this.offCanvas.getContext('2d')
+			// this.offCtx.drawImage(this.img, 0, 0, this.canvasImgSize.width, this.canvasImgSize.height)
 		}, 500)
 	},
 
@@ -111,12 +136,72 @@ export default {
 	},
 
 	setPoint(event) {
-		var bbox = this.canvas.getBoundingClientRect()
-		var loc = {x: event.clientX - bbox.left, y: event.clientY - bbox.top}
+		// var loc = this.windowToCanvas(event)
+		this.centerPoint = this.windowToCanvas(event)
 		this.ctx.strokeStyle = "#ca113f"
 		this.ctx.lineWidth = 2
-		this.ctx.arc(loc.x, loc.y, 1.5, 0, 2* Math.PI)
-		this.pointList.push(loc)
+		this.ctx.arc(this.centerPoint.x, this.centerPoint.y, 1.5, 0, 2* Math.PI)
+		this.pointList.push(this.centerPoint)
+		this.ctx.stroke()
+		console.log(this.pointList)
+	},
+
+	windowToCanvas(event) {
+		var bbox = this.canvas.getBoundingClientRect()
+		return{
+			x: event.clientX - bbox.left, 
+			y: event.clientY - bbox.top
+		}
+	},
+
+	magnifier(event) {
+		this.centerPoint =  this.windowToCanvas(event)
+		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+		this.ctx.drawImage(this.img, 0, 0, this.canvasImgSize.width, this.canvasImgSize.height)
+		this.originalRectangle = {
+			x: this.centerPoint.x - this.originalRadius,
+			y: this.centerPoint.y - this.originalRadius,
+			width: this.originalRadius * 2,
+			height: this.originalRadius * 2
+		}
+		// console.log(this.originalRectangle)
+		this.drawMagnifier()
+	},
+
+	drawMagnifier() {
+		// todo
+		// const {canvas} = this.$refs
+		this.scaleGlassRectangle = {
+			x: this.centerPoint.x - this.originalRectangle.width * this.scale / 2,
+			y: this.centerPoint.y - this.originalRectangle.height * this.scale / 2,
+			width: this.originalRectangle.width * this.scale,
+			height: this.originalRectangle.height * this.scale
+		}
+		this.ctx.save()
+		this.ctx.beginPath()
+		this.ctx.arc(this.centerPoint.x, this.centerPoint.y, this.originalRadius, 0, Math.PI * 2, false)
+		this.ctx.clip()
+		this.ctx.drawImage(this.canvas,
+		this.originalRectangle.x, this.originalRectangle.y,
+		this.originalRectangle.width, this.originalRectangle.height,
+		this.scaleGlassRectangle.x, this.scaleGlassRectangle.y,
+		this.scaleGlassRectangle.width, this.scaleGlassRectangle.height)
+
+		this.ctx.restore()
+
+		this.ctx.beginPath()
+
+		var gradient = this.ctx.createRadialGradient(
+			this.centerPoint.x, this.centerPoint.y, this.originalRadius - 5,
+			this.centerPoint.x, this.centerPoint.y, this.originalRadius)
+		gradient.addColorStop(0, 'rgba(0, 0, 0, 0.2)')
+		gradient.addColorStop(0.80, 'silver');
+        gradient.addColorStop(0.90, 'silver');
+        gradient.addColorStop(1.0, 'rgba(150,150,150,0.9)');
+
+		this.ctx.strokeStyle = gradient
+		this.ctx.lineWidth = 5
+		this.ctx.arc(this.centerPoint.x, this.centerPoint.y, this.originalRadius, 0, Math.PI * 2, false)
 		this.ctx.stroke()
 	}
   }, 
